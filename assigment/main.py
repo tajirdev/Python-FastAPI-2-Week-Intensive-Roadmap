@@ -5,7 +5,7 @@ import schema,models
 
 models.Base.metadata.create_all(engine)
 
-app = FastAPI(title="User Crud API")
+app = FastAPI(title="building a note app with fastapi")
 #blog for user
 @app.post("/post/user",tags=["user"])
 def create_user(request:schema.User,db:Session=Depends(get_db)):
