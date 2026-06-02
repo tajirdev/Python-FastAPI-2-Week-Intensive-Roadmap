@@ -93,7 +93,7 @@ def single(id:str,db:Session=Depends(get_db)):
     }
 
 @app.put("/notes/{id}",tags=["Note"])
-def update( id:str,request:schemas.Note,db:Session=Depends(get_db)):
+def update( id:str,request:schema.Note,db:Session=Depends(get_db)):
     upgrade = db.query(models.note).filter(models.note.id==id).first()
     if not upgrade:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="the note with {id} not found")
