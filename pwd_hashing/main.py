@@ -6,21 +6,13 @@ from database import engine,get_db
 
 models.Base.metadata.create_all(bind=engine)
 
-app= FastAPI()
+app= FastAPI(title="secure User Registration with password hashing")
 
 @app.post("/user/register",tags=["user blog"])
 def register_user(dotto:schema.User,db:Session=Depends(get_db)):
     hashed_password=hash.hash_password(dotto.password)
     
-    register = models.User(
-        username = dotto.username,
-        email = dotto.email,
-        password= hashed_password
-    )
-    if register.username == dotto.username:
-        raise HTTPException(status_code=status.HTTP_208_ALREADY_REPORTED,detail="a user name already exist")
-    if register.email== dotto.email:
-        raise HTTPException(status_code=status.HTTP_208_ALREADY_REPORTED,detail="an email already exist")
+    register = models.User(username = dotto.username,email = dotto.email,password= hashed_password)
     db.add(register)
     db.add(register)
     db.commit()
@@ -59,3 +51,14 @@ def delete(id,db:Session=Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"A user with id {id} not found")
     db.commit()
     return f"A user with id {id} successful deleted"
+
+@app.post("/user/verification",tags=["verification"])
+def verify(request:schema.Userverify,db:Session=Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email==request.email).first()
+    
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='wrong email')
+    hashd_password = hash.verify_password(request.password,user.password)    
+    if not hashd_password:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="wrong passward")
+    return "email and password are correct"
