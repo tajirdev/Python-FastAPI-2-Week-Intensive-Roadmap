@@ -1,12 +1,13 @@
-from pydantic import Basemodel,EmailStr,field_validator 
+from pydantic import BaseModel,EmailStr,field_validator 
 import re
 
-class User(Basemodel):
+class User(BaseModel):
     username:str
     email:EmailStr
-    passwoed:str
+    password:str
     
-    @field_validator("password")
+    @field_validator("password",check_fields=False)
+    @staticmethod
     def password_validation(cls,value):
         if len(value)<8:
             raise ValueError("a password should have at  least 8 characters")
@@ -14,8 +15,9 @@ class User(Basemodel):
             raise ValueError(r'[0-9]',value)
         return value
     
-    @field_validator("email")
+    @field_validator("email",check_fields=False)
+    @staticmethod
     def email_validation(cls,email):
-        if not email.endwith("gmail.com",email):
+        if not email.endswith("@gmail.com"):
             raise ValueError("email should with gmail.com")
         return email

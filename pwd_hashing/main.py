@@ -1,16 +1,20 @@
 from fastapi import FastAPI,Depends,HTTPException,status
 from sqlalchemy.orm import Session
 import models,schema
+from hashing import hash
 from database import engine,get_db
+
+models.Base.metadata.create_all(bind=engine)
 
 app= FastAPI()
 
-@app.post("/user/register",tags=["User blog"])
+@app.post("/user/register",tags=["user blog"])
 def register_user(dotto:schema.User,db:Session=Depends(get_db)):
-    register = models.user(
+    hashed_password=hash.hash_password(dotto.password)
+    register = models.User(
         username = dotto.username,
         email = dotto.email,
-        password= dotto.password
+        password= hashed_password
     )
     db.add(register)
     db.commit()
@@ -25,7 +29,7 @@ def get_all_registered(db:Session=Depends(get_db)):
 
 @app.get("/registered/{id}",tags=["user blog"])
 def get_specific_registered(id,db:Session=Depends(get_db)):
-    register_user= db.query(models.user).filter(models.User.id==id).first()
+    register_user= db.query(models.User).filter(models.User.id==id).first()
     if not register_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"A user with id {id} not found")
     return register_user
@@ -42,7 +46,7 @@ def update(id, request:schema.User,db:Session=Depends(get_db)):
 
 @app.delete("/uesrDelete/{id}",tags=["user blog"])
 def delete(id,db:Session=Depends(get_db)):
-    user = db.query(models.user).filter(models.User.id==id).delete(synchronize_session=True)
+    user = db.query(models.User).filter(models.User.id==id).delete(synchronize_session=True)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"A user with id {id} not found")
     db.commit()
