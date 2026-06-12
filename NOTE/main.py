@@ -13,7 +13,7 @@ def register_user(dotto:schema.User,db:Session=Depends(get_db)):
     hashed_password=hash.hash_password(dotto.password)
     
     register = models.User(username = dotto.username,email = dotto.email,password= hashed_password)
-    db.add(register)
+    
     db.add(register)
     db.commit()
     db.refresh(register)
